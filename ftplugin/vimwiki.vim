@@ -2,7 +2,10 @@ function! vimwiki#follow_link() abort
   let input = expand('<cword>')
   let files = vimwiki#base#complete_file('', '', 0)
   let mapped = map(files, {i, v -> [s:levenshtein_distance(input, v), v]})
-  let sorted = sort(mapped, {i, v -> v[0]})
+  echo mapped
+  echo '##############'
+  let sorted = sort(mapped, {i1, i2 -> i1[0] - i2[0]})
+  echo sorted
 endfunction
 
 function! s:levenshtein_distance(s1, s2) abort
