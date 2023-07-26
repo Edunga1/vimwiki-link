@@ -1,14 +1,17 @@
-if exists('g:loaded_vimwiki_slink_base') || &compatible
-  finish
-endif
-let g:loaded_vimwiki_slink_base = 1
-
 function! vimwiki_slink#base#follow_link() abort
+  let files = vimwiki_slink#base#get_related_files()
+  for idx in range(0, len(files) - 1)
+    echo printf('%2d %s %s', idx+1, files[idx][1], files[idx][0])
+  endfor
+  let idx = input('Select file: ')
+  echo "\n" . files[idx-1][1]
+endfunction
+
+function! vimwiki_slink#base#get_related_files() abort
   let input = expand('<cword>')
   let files = vimwiki#base#complete_file('', '', 0)
   let mapped = map(files, {i, v -> [s:levenshtein_distance(input, v), v]})
-  let sorted = sort(mapped, {i1, i2 -> i1[0] - i2[0]})
-  echo sorted[:10]
+  return sort(mapped, {i1, i2 -> i1[0] - i2[0]})[:10]
 endfunction
 
 function! s:levenshtein_distance(s1, s2) abort
