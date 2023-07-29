@@ -4,7 +4,17 @@ function! vimwiki_slink#base#follow_link() abort
     echo printf('%2d %s %s', idx+1, files[idx][1], files[idx][0])
   endfor
   let idx = input('Select file: ')
-  echo "\n" . files[idx-1][1]
+  let selected = files[idx-1][1]
+  let lnk = vimwiki#base#matchstr_at_cursor(vimwiki#vars#get_global('rxWord'))
+  let sub = vimwiki#base#normalize_link_helper(
+        \ selected,
+        \ vimwiki#vars#get_global('rxWord'), lnk,
+        \ vimwiki#vars#get_syntaxlocal('Link1'))
+  let sub = vimwiki#base#apply_template(
+        \ vimwiki#vars#get_syntaxlocal('WikiLink1Template2'),
+        \ selected,
+        \ lnk, '', '')
+  call vimwiki#base#replacestr_at_cursor('\V'.lnk, sub)
 endfunction
 
 function! vimwiki_slink#base#get_related_files() abort
