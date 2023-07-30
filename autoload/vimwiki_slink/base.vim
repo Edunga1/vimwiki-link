@@ -1,3 +1,8 @@
+if exists('g:autoloaded_vimwiki_link')
+  finish
+endif
+let g:autoloaded_vimwiki_link = 1
+
 function! vimwiki_slink#base#follow_link() abort
   let files = vimwiki_slink#base#get_related_files()
   for idx in range(0, len(files) - 1)
