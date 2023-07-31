@@ -8,7 +8,14 @@ function! vimwiki_link#base#follow_link() abort
   for idx in range(0, len(files) - 1)
     echo printf('%2d %s %s', idx+1, files[idx][1], files[idx][0])
   endfor
-  let idx = input('Select file: ')
+  let idx = input('Select file by number: ')
+  if idx !~# '\m[0-9]\+'
+    return
+  elseif idx > len(files) || idx <= 0
+    echo "\n"
+    echom 'index out of range.'
+    return
+  endif
   let selected = files[idx-1][1]
   let lnk = vimwiki#base#matchstr_at_cursor(vimwiki#vars#get_global('rxWord'))
   let sub = vimwiki#base#normalize_link_helper(
@@ -22,11 +29,12 @@ function! vimwiki_link#base#follow_link() abort
   call vimwiki#base#replacestr_at_cursor('\V'.lnk, sub)
 endfunction
 
-function! vimwiki_link#base#get_related_files() abort
+function! vimwiki_link#base#get_related_files(...) abort
+  let size = a:0 ? a:0 : 10
   let input = expand('<cword>')
   let files = vimwiki#base#complete_file('', '', 0)
   let mapped = map(files, {i, v -> [s:levenshtein_distance(input, v), v]})
-  return sort(mapped, {i1, i2 -> i1[0] - i2[0]})[:10]
+  return sort(mapped, {i1, i2 -> i1[0] - i2[0]})[:size - 1]
 endfunction
 
 function! s:levenshtein_distance(s1, s2) abort
