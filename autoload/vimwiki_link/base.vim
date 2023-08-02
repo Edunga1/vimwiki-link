@@ -6,7 +6,7 @@ let g:autoloaded_vimwiki_link = 1
 function! vimwiki_link#base#follow_link() abort
   let files = vimwiki_link#base#get_related_files()
   for idx in range(0, len(files) - 1)
-    echo printf('%2d %s %s', idx+1, files[idx][1], files[idx][0])
+    echo printf('%2d %s', idx+1, files[idx])
   endfor
   let idx = input('Select file by number: ')
   if idx !~# '\m[0-9]\+'
@@ -16,7 +16,7 @@ function! vimwiki_link#base#follow_link() abort
     echom 'index out of range.'
     return
   endif
-  let selected = files[idx-1][1]
+  let selected = files[idx-1]
   let lnk = vimwiki#base#matchstr_at_cursor(vimwiki#vars#get_global('rxWord'))
   let sub = vimwiki#base#normalize_link_helper(
         \ selected,
@@ -33,33 +33,8 @@ function! vimwiki_link#base#get_related_files(...) abort
   let size = a:0 ? a:0 : 10
   let input = expand('<cword>')
   let files = vimwiki#base#complete_file('', '', 0)
-  let mapped = map(files, {i, v -> [s:levenshtein_distance(input, v), v]})
-  return sort(mapped, {i1, i2 -> i1[0] - i2[0]})[:size - 1]
-endfunction
-
-function! s:levenshtein_distance(s1, s2) abort
-  let m = len(a:s1) + 1
-  let n = len(a:s2) + 1
-
-  let d = range(0, n)
-  let x = 0
-
-  for i in range(1, m - 1)
-    let old_x = d[0]
-    let d[0] = i
-
-    for j in range(1, n - 1)
-      let cost = (strcharpart(a:s1, i - 1, 1) != strcharpart(a:s2, j - 1, 1))
-      let min1 = d[j] + 1
-      let min2 = d[j - 1] + 1
-      let min3 = old_x + cost
-
-      let x = d[j]
-      let d[j] = min([min1, min2, min3])
-
-      let old_x = x
-    endfor
-  endfor
-
-  return d[n - 1]
+  let lst = files->map({_, v -> {'file': v, 'name': fnamemodify(v:val, ":t:r")}})
+  let searched = lst->matchfuzzy(input, {'key': 'name'})
+        \ ->map({_, v -> v['file']})
+  return searched[:size]
 endfunction
