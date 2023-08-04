@@ -5,6 +5,10 @@ let g:autoloaded_vimwiki_link = 1
 
 function! vimwiki_link#base#follow_link() abort
   let files = vimwiki_link#base#get_related_files()
+  if len(files) == 0
+    echom 'No files to link to.'
+    return
+  endif
   for idx in range(0, len(files) - 1)
     echo printf('%2d %s', idx+1, files[idx])
   endfor
